@@ -13,6 +13,7 @@ services:
       - PORT=${CLIENT_GATEWAY_PORT}
       - NATS_SERVERS=${NATS_SERVERS}
 
+  # auth-ms
   auth-ms:
     build:
       context: ./auth-ms
