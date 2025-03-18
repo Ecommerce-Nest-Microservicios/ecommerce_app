@@ -10,7 +10,7 @@ on:
       - 'products-ms/**'
       - 'orders-ms/**'
       - 'payments-ms/**'
-      - 'docker-compose.prod.yml'
+      - 'docker-compose.yml'
 
 jobs:
   build-and-push:
@@ -20,19 +20,26 @@ jobs:
         service: [gateway, auth-ms, products-ms, orders-ms, payments-ms]
 
     steps:
+      # Clona el repositorio principal con los submodules
       - name: Checkout repo with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Update submodules
-        run: git submodule update --init --recursive --force
+      # Autenticación en Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
+      # Construye y sube la imagen de Docker
       - name: Build and push ${{ matrix.service }}
         run: |
-          docker build -t naluengas/microservicios-nestjs:${{ matrix.service }} -f ${{ matrix.service }}/dockerfile.prod ./${{ matrix.service }}
+          docker build \
+            -t naluengas/microservicios-nestjs:${{ matrix.service }} \
+            -f ${{ matrix.service }}/dockerfile.prod \
+            --platform=linux/amd64 \
+            ./${{ matrix.service }}
           docker push naluengas/microservicios-nestjs:${{ matrix.service }}
