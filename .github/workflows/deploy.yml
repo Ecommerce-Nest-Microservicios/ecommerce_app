@@ -10,7 +10,7 @@ on:
       - 'products-ms/**'
       - 'orders-ms/**'
       - 'payments-ms/**'
-      - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
 
 jobs:
   build-and-push:
