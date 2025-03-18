@@ -1,31 +1,22 @@
-name: CI/CD Microservices
+name: Docker Build and Push
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'gateway/**'
-      - 'auth-ms/**'
-      - 'products-ms/**'
-      - 'orders-ms/**'
-      - 'payments-ms/**'
-      - 'docker-compose.yml'
+      - '*'
+      - '**' # Se ejecuta cuando hay cambios en cualquier archivo del submódulo
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [gateway, auth-ms, products-ms, orders-ms, payments-ms]
-
     steps:
-      # Clona el repositorio principal con los submodules
-      - name: Checkout repo with submodules
+      # Clona el submódulo
+      - name: Checkout submodule
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       # Autenticación en Docker Hub
       - name: Log in to Docker Hub
@@ -34,12 +25,16 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Construye y sube la imagen de Docker
-      - name: Build and push ${{ matrix.service }}
+      # Construye la imagen de Docker
+      - name: Build Docker image
         run: |
           docker build \
-            -t naluengas/microservicios-nestjs:${{ matrix.service }} \
-            -f ${{ matrix.service }}/dockerfile.prod \
+            -t naluengas/microservicios-nestjs:${{ github.event.repository.name }} \
+            -f ${{ github.event.repository.name }}/dockerfile.prod \
             --platform=linux/amd64 \
-            ./${{ matrix.service }}
-          docker push naluengas/microservicios-nestjs:${{ matrix.service }}
+            ./${{ github.event.repository.name }}
+
+      # Sube la imagen de Docker a Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push naluengas/microservicios-nestjs:${{ github.event.repository.name }}
