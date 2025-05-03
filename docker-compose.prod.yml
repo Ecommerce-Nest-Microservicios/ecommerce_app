@@ -18,6 +18,8 @@ services:
     build:
       context: ./auth-ms
       dockerfile: dockerfile.prod
+      args:
+        - AUTH_DATABASE_URL=${AUTH_MONGODB_URL}
     image: naluengas/microservicios-nestjs:auth-ms
     environment:
       - NATS_SERVERS=${NATS_SERVERS}
@@ -29,7 +31,7 @@ services:
       context: ./products-ms
       dockerfile: dockerfile.prod
       args:
-        - AUTH_MYSQL_URL=${AUTH_MYSQL_URL}
+        - PRODUCTS_DATABASE_URL=${AUTH_MYSQL_URL}
     image: naluengas/microservicios-nestjs:products-ms
     environment:
       - DATABASE_URL=${AUTH_MYSQL_URL}
@@ -41,7 +43,7 @@ services:
       context: ./orders-ms
       dockerfile: dockerfile.prod
       args:
-        - AUTH_POSTGRES_URL=${AUTH_POSTGRES_URL}
+        - ORDERS_DATABASE_URL=${AUTH_POSTGRES_URL}
     image: naluengas/microservicios-nestjs:orders-ms
     environment:
       - DATABASE_URL=${AUTH_POSTGRES_URL}
